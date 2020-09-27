@@ -12,6 +12,17 @@ namespace Rapp_Plugins
             var factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             var service = new Lazy<IOrganizationService>(() => factory.CreateOrganizationService(context.UserId));
 
+            if (context.MessageName != "Create")
+            {
+                tracer.Trace($"Wrong message: {context.MessageName}");
+                return;
+            }
+            if (context.PrimaryEntityName != "account")
+            {
+                tracer.Trace($"Wrong entity: {context.PrimaryEntityName}");
+                return;
+            }
+
             if (context.InputParameters.ContainsKey("Target") && context.InputParameters["Target"] is Entity target)
             {
                 if (!target.Contains("accountnumber"))
