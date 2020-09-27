@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30323.103
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapp Plugins", "Rapp Plugins\Rapp Plugins.csproj", "{A169F3B4-A2F6-4A6D-AFE5-D937755D421B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A169F3B4-A2F6-4A6D-AFE5-D937755D421B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A169F3B4-A2F6-4A6D-AFE5-D937755D421B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A169F3B4-A2F6-4A6D-AFE5-D937755D421B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A169F3B4-A2F6-4A6D-AFE5-D937755D421B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4565693D-F5D2-4E23-A8A8-D1B3AD71D9CA}
+	EndGlobalSection
+EndGlobal
