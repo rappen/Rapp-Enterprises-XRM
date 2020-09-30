@@ -31,6 +31,10 @@ namespace Rapp_Plugins
                 }
                 var accountnumber = target["accountnumber"] as string;
 
+                if (!int.TryParse(accountnumber, out int numericnumber))
+                {
+                    throw new InvalidPluginExecutionException("Account Number must be numeric.");
+                }
             }
         }
     }
