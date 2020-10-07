@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Rapp_Plugins
@@ -39,15 +40,24 @@ namespace Rapp_Plugins
                 {
                     return;
                 }
-                var account = service.Retrieve("account", accountref.Id, new ColumnSet("accountid", "name", "description"));
-                account.TryGetAttributeValue("description", out string contactlist);
-                tracer.Trace($"Retrieved account: {account["name"]}");
 
+                var sw = Stopwatch.StartNew();
+                var account = service.Retrieve("account", accountref.Id, new ColumnSet("accountid", "name", "description"));
+                sw.Stop();
+                tracer.Trace($"Retrieved account: {account["name"]} in {sw.ElapsedMilliseconds} ms");
+
+                account.TryGetAttributeValue("description", out string contactlist);
+                
                 var query = new QueryExpression("contact");
                 query.ColumnSet = new ColumnSet("firstname");
                 query.Criteria.AddCondition("parentcustomerid", ConditionOperator.Equal, accountref.Id);
                 query.AddOrder("firstname", OrderType.Ascending);
+
+                sw.Restart();
                 var contacts = service.RetrieveMultiple(query);
+                sw.Stop();
+                tracer.Trace($"Retrieved {contacts.Entities.Count} contacts in {sw.ElapsedMilliseconds} ms");
+
                 var newcontactlist = contacts.Entities
                     .Where(c => c.Contains("firstname"))
                     .Select(c => c["firstname"] as string)
