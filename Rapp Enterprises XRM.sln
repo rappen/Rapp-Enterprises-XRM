@@ -5,7 +5,13 @@ VisualStudioVersion = 16.0.30323.103
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapp Plugins", "Rapp Plugins\Rapp Plugins.csproj", "{A169F3B4-A2F6-4A6D-AFE5-D937755D421B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Common", "Common\Common.shproj", "{690926CD-4C88-4A42-BED8-26807011963F}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Common\Common.projitems*{690926cd-4c88-4a42-bed8-26807011963f}*SharedItemsImports = 13
+		Common\Common.projitems*{a169f3b4-a2f6-4a6d-afe5-d937755d421b}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
