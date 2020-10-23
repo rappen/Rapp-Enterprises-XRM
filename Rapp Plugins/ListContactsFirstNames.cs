@@ -8,6 +8,12 @@ namespace Rapp_Plugins
 {
     public class ListContactsFirstNames : IPlugin
     {
+        /* 
+         * Concatenate first names of all Contacts to 
+         * the Description field of their parent Account.
+         * 
+         * Triggered on Create and Update of Contact.
+         */
         public void Execute(IServiceProvider serviceProvider)
         {
             var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));

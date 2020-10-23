@@ -5,6 +5,11 @@ namespace Rapp_Plugins
 {
     public class VerifyAccountNo : IPlugin
     {
+        /*
+         * Verify that Account Number is numeric
+         * 
+         * Triggered on Create of Account.
+         */
         public void Execute(IServiceProvider serviceProvider)
         {
             var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
