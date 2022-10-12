@@ -1,0 +1,3 @@
+[submodule "CS22-Common"]
+	path = CS22-Common
+	url = https://github.com/rappen/CS22-Common
