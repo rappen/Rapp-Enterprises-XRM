@@ -1,45 +1,31 @@
-﻿using Microsoft.Xrm.Sdk;
-using System;
+﻿using Common;
+using Microsoft.Xrm.Sdk;
 
 namespace Rapp_Plugins
 {
-    public class VerifyAccountNo : IPlugin
+    /*
+     * Verify that Account Number is numeric
+     *
+     * Triggered on Create of Account.
+     */
+
+    public class VerifyAccountNo : RappPluginBase
     {
-        /*
-         * Verify that Account Number is numeric
-         * 
-         * Triggered on Create of Account.
-         */
-        public void Execute(IServiceProvider serviceProvider)
+        public override string ExpectedEntity => "account";
+
+        public override string[] ExpectedMessages => new[] { "Create" };
+
+        public override void Execute(RappContext rc)
         {
-            var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
-            var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
-            var factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
-            var service = new Lazy<IOrganizationService>(() => factory.CreateOrganizationService(context.UserId));
-
-            if (context.MessageName != "Create")
-            {
-                tracer.Trace($"Wrong message: {context.MessageName}");
+            if (!rc.Target.Contains("accountnumber"))
+            {   // All good
                 return;
             }
-            if (context.PrimaryEntityName != "account")
-            {
-                tracer.Trace($"Wrong entity: {context.PrimaryEntityName}");
-                return;
-            }
+            var accountnumber = rc.Target["accountnumber"] as string;
 
-            if (context.InputParameters.ContainsKey("Target") && context.InputParameters["Target"] is Entity target)
+            if (!int.TryParse(accountnumber, out int numericnumber))
             {
-                if (!target.Contains("accountnumber"))
-                {   // All good
-                    return;
-                }
-                var accountnumber = target["accountnumber"] as string;
-
-                if (!int.TryParse(accountnumber, out int numericnumber))
-                {
-                    throw new InvalidPluginExecutionException("Account Number must be numeric.");
-                }
+                throw new InvalidPluginExecutionException("Account Number must be numeric.");
             }
         }
     }
