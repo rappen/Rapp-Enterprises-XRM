@@ -1,3 +1,7 @@
+# *Improved at [DynamicsMinds 2023](https://dynamicsminds.com)!*
+
+---
+
 # Rapp-Enterprises-XRM
 
 This contains a pretty simple plugin project with a few plugins simply implementing `IPlugin`.
