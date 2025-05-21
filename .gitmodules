@@ -1,0 +1,3 @@
+[submodule "RappSack"]
+	path = RappSack
+	url = https://github.com/rappen/RappSack

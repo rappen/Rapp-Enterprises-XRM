@@ -107,5 +107,7 @@
     <None Include="packages.config" />
     <None Include="Rapp Enterprises.snk" />
   </ItemGroup>
+  <Import Project="..\CommonStuff\CommonStuff.projitems" Label="Shared" />
+  <Import Project="..\rappsack\Rappen.XRM.RappSack.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

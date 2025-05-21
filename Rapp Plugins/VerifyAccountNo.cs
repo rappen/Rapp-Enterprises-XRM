@@ -1,58 +1,34 @@
-﻿using Microsoft.Xrm.Sdk;
+﻿using CommonStuff;
+using Microsoft.Xrm.Sdk;
+using Rappen.XRM.RappSack;
 using System;
 using System.Linq;
 
 namespace Rapp_Plugins
 {
-    public class VerifyAccountNo : IPlugin
+    public class VerifyAccountNo : RappSackPlugin
     {
         /*
-         * Verify that Account Number is numeric
-         *
-         * Triggered on Create of Account.
-         */
+* Verify that Account Number is numeric
+*
+* Triggered on Create of Account.
+*/
+        public override string NeedEntity => "account";
+        public override string[] NeedMessages => new[] { "Create" };
+        public override int NeedStage => 10;
+        public override string[] NeedAttributes => new[] { "accountnumber" };
+        public override bool NeedThrowIfNotMatch => true;
 
-        public void Execute(IServiceProvider serviceProvider)
+        public override void Execute()
         {
-            var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
-            var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
-            var factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
-            var service = new Lazy<IOrganizationService>(() => factory.CreateOrganizationService(context.UserId));
-
-            if (context.MessageName != "Create")
-            {
-                tracer.Trace($"Wrong message: {context.MessageName}");
-                return;
-            }
-            if (context.Stage != 10)
-            {
-                tracer.Trace($"Wrong stage: {context.Stage}");
-                return;
-            }
-            if (context.PrimaryEntityName != "account")
-            {
-                tracer.Trace($"Wrong entity: {context.PrimaryEntityName}");
-                return;
-            }
-            if (!context.InputParameters.ContainsKey("Target") || !(context.InputParameters["Target"] is Entity target))
-            {
-                tracer.Trace("Target is not an entity.");
-                return;
-            }
-            if (!target.Contains("accountnumber"))
-            {   // All good
-                tracer.Trace("Account Number not set.");
-                return;
-            }
-
-            var accountnumber = target["accountnumber"] as string;
+            var accountnumber = Target["accountnumber"] as string;
 
             if (accountnumber.Any(c => !char.IsDigit(c)))
             {
                 throw new InvalidPluginExecutionException($"Account Number must be numeric. ({accountnumber})");
             }
 
-            tracer.Trace($"Account Number is numeric: {accountnumber}");
+            Trace($"Account Number is numeric: {accountnumber}");
         }
     }
 }
