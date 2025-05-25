@@ -2,20 +2,12 @@
 using Microsoft.Xrm.Sdk.Query;
 using Rappen.XRM.RappSack;
 using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Rapp_Plugins
 {
     public class ListContactsFirstNames : RappSackPlugin
     {
-        /*
-         * Concatenate first names of all Contacts to
-         * the Description field of their parent Account.
-         *
-         * Triggered on Create and Update of Contact.
-         */
-
         public override string NeedEntity => "contact";
         public override string[] NeedMessages => new[] { "Create", "Update" };
         public override string[] NeedAttributes => new[] { "parentcustomerid" };
