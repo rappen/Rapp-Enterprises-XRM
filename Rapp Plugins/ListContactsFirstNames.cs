@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
 using Rappen.XRM.RappSack;
-using System;
 using System.Linq;
 
 namespace Rapp_Plugins
@@ -9,33 +7,21 @@ namespace Rapp_Plugins
     public class ListContactsFirstNames : RappSackPlugin
     {
         public override string NeedEntity => "contact";
-        public override string[] NeedMessages => new[] { "Create", "Update" };
+        public override string[] NeedMessages => new[] { "Create", "Update", "Delete" };
         public override string[] NeedAttributes => new[] { "parentcustomerid" };
 
         public override void Execute()
         {
-            var Target = ContextEntity[ContextEntityType.Complete];
-            var accountref = Target["parentcustomerid"] as EntityReference;
-            if (accountref.Id.Equals(Guid.Empty))
-            {
-                Trace("No parentcustomerid, just exit.");
-                return;
-            }
+            var contact = ContextEntity[ContextEntityType.Complete];
 
-            var account = Retrieve("account", accountref.Id, new ColumnSet("accountid", "name", "description"));
+            var account = contact.GetParent(this, "parentcustomerid", "accountid", "name", "description");
 
-            account.TryGetAttributeValue("description", out string contactlist);
+            var contactlist = account.AttributeValue("description", string.Empty);
 
-            var query = new QueryExpression("contact");
-            query.ColumnSet = new ColumnSet("firstname");
-            query.Criteria.AddCondition("parentcustomerid", ConditionOperator.Equal, accountref.Id);
-            query.AddOrder("firstname", OrderType.Ascending);
-
-            var contacts = RetrieveMultiple(query);
+            var contacts = account.GetChildren(this, "contact", "parentcustomerid", true, "firstname");
 
             var newcontactlist = contacts.Entities
-                .Where(c => c.Contains("firstname"))
-                .Select(c => c["firstname"] as string)
+                .Select(c => c.AttributeValue("firstname", string.Empty))
                 .Distinct();
 
             if (!newcontactlist.Equals(contactlist))
