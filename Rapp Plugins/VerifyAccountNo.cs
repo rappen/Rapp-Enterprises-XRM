@@ -17,7 +17,7 @@ namespace Rapp_Plugins
             var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
             var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
             var factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
-            var service = new Lazy<IOrganizationService>(() => factory.CreateOrganizationService(context.UserId));
+            var service = factory.CreateOrganizationService(context.UserId);
 
             if (context.MessageName != "Create")
             {

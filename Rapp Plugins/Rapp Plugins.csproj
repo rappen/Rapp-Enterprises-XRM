@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ListContactsFirstNames.cs" />
+    <Compile Include="SetAccountCountEmployees.cs" />
     <Compile Include="VerifyAccountNo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
