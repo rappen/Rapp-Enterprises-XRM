@@ -49,19 +49,24 @@ namespace Rapp_Plugins
             CountEmployees(service, tracer, newAccountRef);
         }
 
-        private void CountEmployees(IOrganizationService service, ITracingService tracer, EntityReference accountRef)
+        private static void CountEmployees(IOrganizationService service, ITracingService tracer, EntityReference accountRef)
         {
             if (accountRef == null || accountRef.Id.Equals(Guid.Empty))
             {
                 tracer.Trace("No account reference, just exit.");
                 return;
             }
+
             var sw = Stopwatch.StartNew();
             var account = service.Retrieve("account", accountRef.Id, new ColumnSet("accountid", "name", "numberofemployees"));
             sw.Stop();
             tracer.Trace($"Retrieved account: {account["name"]} in {sw.ElapsedMilliseconds} ms");
 
-            account.TryGetAttributeValue("numberofemployees", out int oldemployees);
+            var oldemployees = 0;
+            if (account.Contains("numberofemployees"))
+            {
+                oldemployees = (int)account.Attributes["numberofemployees"];
+            }
 
             var query = new QueryExpression("contact");
             query.ColumnSet = new ColumnSet("fullname");
