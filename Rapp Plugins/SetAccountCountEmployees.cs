@@ -8,6 +8,17 @@ namespace Rapp_Plugins
 {
     public class SetAccountCountEmployees : IPlugin
     {
+        /*
+         * Set Account Number of Employees based on number of active Contacts
+         *
+         * Triggered on Create, Update and Delete of Contact.
+         * On Update only if parentcustomerid is changed.
+         *
+         * Note: This plugin does not handle the case where a Contact is deactivated/reactivated.
+         *       To handle that case, a workflow or Power Automate flow should be created to call
+         *       an action that will trigger this plugin.
+         */
+
         public void Execute(IServiceProvider serviceProvider)
         {
             var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
@@ -25,21 +36,22 @@ namespace Rapp_Plugins
                 tracer.Trace($"Wrong message: {context.MessageName}");
                 return;
             }
-            if (!context.InputParameters.ContainsKey("Target") ||
-                !(context.InputParameters["Target"] is Entity target) ||
-                !target.Contains("parentcustomerid"))
+
+            var target = context.InputParameters.ContainsKey("Target") ? context.InputParameters["Target"] as Entity : null;
+
+            if (target != null && !target.Contains("parentcustomerid"))
             {
                 tracer.Trace("Target is not an entity or does not contain parentcustomerid.");
                 return;
             }
 
-            var customerRef = target["parentcustomerid"] as EntityReference;
+            var customerRef = target?["parentcustomerid"] as EntityReference;
             var newAccountRef = customerRef?.LogicalName == "account" ? customerRef : null;
-            var oldAccountRef = (EntityReference)null;
 
+            var oldAccountRef = (EntityReference)null;
             if (context.PreEntityImages.Count > 0 &&
-                 context.PreEntityImages[context.PreEntityImages.Keys.First()] is Entity preimage &&
-                 preimage.Contains("parentcustomerid"))
+                context.PreEntityImages[context.PreEntityImages.Keys.First()] is Entity preimage &&
+                preimage.Contains("parentcustomerid"))
             {
                 var oldCustomerRef = preimage["parentcustomerid"] as EntityReference;
                 oldAccountRef = oldCustomerRef?.LogicalName == "account" ? oldCustomerRef : null;
