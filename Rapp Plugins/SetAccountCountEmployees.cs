@@ -1,105 +1,37 @@
-﻿using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
-using System;
-using System.Diagnostics;
-using System.Linq;
+﻿using Common;
+using Microsoft.Xrm.Sdk;
 
 namespace Rapp_Plugins
 {
-    public class SetAccountCountEmployees : IPlugin
+    public class SetAccountCountEmployees : JRPlugin
     {
-        /*
-         * Set Account Number of Employees based on number of active Contacts
-         *
-         * Triggered on Create, Update and Delete of Contact.
-         * On Update only if parentcustomerid is changed.
-         *
-         * Note: This plugin does not handle the case where a Contact is deactivated/reactivated.
-         *       To handle that case, a workflow or Power Automate flow should be created to call
-         *       an action that will trigger this plugin.
-         */
+        public override string TriggerEntity => "contact";
+        public override string[] TriggerMessages => new string[] { "Create", "Update", "Delete" };
 
-        public void Execute(IServiceProvider serviceProvider)
+        public override void Execute()
         {
-            var tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
-            var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
-            var factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
-            var service = factory.CreateOrganizationService(context.UserId);
-
-            if (context.PrimaryEntityName != "contact")
-            {
-                tracer.Trace($"Wrong entity: {context.PrimaryEntityName}");
-                return;
-            }
-            if (context.MessageName != "Create" || context.MessageName != "Update" || context.MessageName != "Delete")
-            {
-                tracer.Trace($"Wrong message: {context.MessageName}");
-                return;
-            }
-
-            var target = context.InputParameters.ContainsKey("Target") ? context.InputParameters["Target"] as Entity : null;
-
-            if (target != null && !target.Contains("parentcustomerid"))
-            {
-                tracer.Trace("Target is not an entity or does not contain parentcustomerid.");
-                return;
-            }
-
-            var customerRef = target?["parentcustomerid"] as EntityReference;
-            var newAccountRef = customerRef?.LogicalName == "account" ? customerRef : null;
-
-            var oldAccountRef = (EntityReference)null;
-            if (context.PreEntityImages.Count > 0 &&
-                context.PreEntityImages[context.PreEntityImages.Keys.First()] is Entity preimage &&
-                preimage.Contains("parentcustomerid"))
-            {
-                var oldCustomerRef = preimage["parentcustomerid"] as EntityReference;
-                oldAccountRef = oldCustomerRef?.LogicalName == "account" ? oldCustomerRef : null;
-            }
-
-            CountEmployees(service, tracer, oldAccountRef);
-            CountEmployees(service, tracer, newAccountRef);
+            CountEmployees(this, preImage);
+            CountEmployees(this, target);
         }
 
-        private static void CountEmployees(IOrganizationService service, ITracingService tracer, EntityReference accountRef)
+        private static void CountEmployees(JRPlugin jr, Entity contact)
         {
-            if (accountRef == null || accountRef.Id.Equals(Guid.Empty))
+            var account = contact.GetParent(jr, "parentcustomerid", "accountid", "name", "numberofemployees");
+            if (account == null)
             {
-                tracer.Trace("No account reference, just exit.");
+                jr.Trace("Contact has no parent account.");
                 return;
             }
+            var oldemployees = account.GetAttributeValue<int>("numberofemployees");
 
-            var sw = Stopwatch.StartNew();
-            var account = service.Retrieve("account", accountRef.Id, new ColumnSet("accountid", "name", "numberofemployees"));
-            sw.Stop();
-            tracer.Trace($"Retrieved account: {account["name"]} in {sw.ElapsedMilliseconds} ms");
-
-            var oldemployees = 0;
-            if (account.Contains("numberofemployees"))
-            {
-                oldemployees = (int)account.Attributes["numberofemployees"];
-            }
-
-            var query = new QueryExpression("contact");
-            query.ColumnSet = new ColumnSet("fullname");
-            query.Criteria.AddCondition("parentcustomerid", ConditionOperator.Equal, accountRef.Id);
-            query.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
-
-            sw.Restart();
-            var contacts = service.RetrieveMultiple(query);
-            sw.Stop();
-            tracer.Trace($"Retrieved {contacts.Entities.Count} contacts in {sw.ElapsedMilliseconds} ms");
-
+            var contacts = account.GetChildren(jr, "contact", "parentcustomerid", true, "contactid");
             var newemployees = contacts.Entities.Count;
 
             if (!newemployees.Equals(oldemployees))
             {
-                var updaccount = new Entity("account", account.Id);
+                var updaccount = account.Vanilla();
                 updaccount["numberofemployees"] = newemployees;
-                sw.Restart();
-                service.Update(updaccount);
-                sw.Stop();
-                tracer.Trace($"Updated account: {account["name"]} with {newemployees} contacts in {sw.ElapsedMilliseconds} ms");
+                jr.Update(updaccount);
             }
         }
     }
